@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dimitris Tzouliano — Industrial Designer & CAD Specialist</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <style>
+    :root {
+      --teal:#00687a; --tb:#00a8c0; --tg:#00d4f0;
+      --td:#003d47; --tu:rgba(0,104,122,0.18);
+      --bk:#040a0c; --dk:#070f12; --pn:rgba(10,20,24,0.92);
+      --br:rgba(0,104,122,0.25);
+      --tx:#c8e8ed; --tm:#8bbdc9; --ts:#5a8a94; --wh:#eaf6f9;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    ::-webkit-scrollbar{width:4px;}
+    ::-webkit-scrollbar-track{background:var(--bk);}
+    ::-webkit-scrollbar-thumb{background:var(--teal);}
+    body{background:var(--bk);color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6;overflow-x:hidden;cursor:none;--mx:50%;--my:50%;}
+    h1,h2,h3{font-family:'Rajdhani',sans-serif;font-weight:700;text-transform:uppercase;}
+
+    body::before{content:"";position:fixed;inset:0;background-image:linear-gradient(var(--br) 1px,transparent 1px),linear-gradient(90deg,var(--br) 1px,transparent 1px);background-size:50px 50px;z-index:-2;opacity:.35;}
+    body::after{content:"";position:fixed;inset:0;background:radial-gradient(circle at var(--mx) var(--my),rgba(0,168,192,.1),transparent 32%);z-index:-1;pointer-events:none;}
+
+    /* CURSOR */
+    .cur-d,.cur-r{position:fixed;top:0;left:0;pointer-events:none;z-index:4000;transform:translate(-50%,-50%);}
+    .cur-d{width:6px;height:6px;background:var(--tb);border-radius:50%;box-shadow:0 0 12px rgba(0,168,192,.9);}
+    .cur-r{width:28px;height:28px;border:1px solid rgba(0,168,192,.55);border-radius:50%;transition:width .2s,height .2s,border-color .2s;background:rgba(0,104,122,.06);}
+    .cur-r.hov{width:42px;height:42px;border-color:rgba(0,212,240,.9);background:rgba(0,168,192,.1);}
+    .cur-r.prs{width:18px;height:18px;}
+    a,button{cursor:none;}
+
+    /* NAV — exact from first attempt */
+    nav{position:fixed;top:0;width:100%;padding:0 50px;height:56px;display:flex;justify-content:space-between;align-items:center;background:rgba(4,10,12,.96);backdrop-filter:blur(12px);z-index:1000;border-bottom:1px solid var(--br);}
+    .logo{color:var(--tb);letter-spacing:3px;font-size:15px;font-family:'Rajdhani',sans-serif;font-weight:700;}
+    .logo span{color:var(--ts);}
+    .nav-links{display:flex;gap:30px;}
+    .nav-lnk{text-decoration:none;color:var(--ts);font-size:11px;letter-spacing:.12em;transition:color .3s;}
+    .nav-lnk:hover{color:var(--tg);}
+    .nav-st{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--ts);}
+    .nav-dot{width:6px;height:6px;border-radius:50%;background:#00ff88;box-shadow:0 0 8px #00ff88;animation:blink 2s ease-in-out infinite;}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+    /* HERO — exact layout from first attempt */
+    #hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;padding-top:56px;position:relative;overflow:hidden;}
+    .hero-l{display:flex;flex-direction:column;justify-content:center;padding:60px;position:relative;z-index:2;}
+    .hero-badge{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--br);padding:6px 14px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--tb);margin-bottom:32px;background:rgba(0,104,122,.08);width:fit-content;}
+    .hero-badge::before{content:"◆";font-size:7px;}
+    h1{font-size:clamp(42px,5vw,72px);line-height:.95;letter-spacing:-1px;color:var(--wh);margin-bottom:8px;}
+    h1 .ac{color:var(--tb);}
+    .hero-role{font-family:'Rajdhani',sans-serif;font-size:clamp(13px,1.5vw,18px);font-weight:400;letter-spacing:3px;text-transform:uppercase;color:var(--ts);margin-bottom:30px;}
+    .hero-desc{font-size:13px;color:var(--tm);line-height:1.9;max-width:440px;margin-bottom:38px;border-left:2px solid var(--teal);padding-left:18px;}
+    .hero-metrics{display:flex;gap:32px;margin-bottom:38px;}
+    .mv{font-family:'Rajdhani',sans-serif;font-size:36px;font-weight:700;color:var(--tg);line-height:1;}
+    .ml{font-size:10px;color:var(--ts);letter-spacing:.1em;text-transform:uppercase;margin-top:3px;}
+    .hero-cta{display:flex;gap:12px;}
+    .btn{padding:12px 26px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;transition:all .3s;border:none;display:inline-block;}
+    .btn-p{background:var(--teal);border:1px solid var(--tb);color:var(--wh);}
+    .btn-p:hover{background:var(--tb);box-shadow:0 0 24px rgba(0,168,192,.4);}
+    .btn-g{background:transparent;border:1px solid var(--br);color:var(--ts);}
+    .btn-g:hover{border-color:var(--tb);color:var(--wh);}
+
+    /* HERO RIGHT — CAD simulation panel */
+    .hero-r{background:var(--dk);border-left:1px solid var(--br);position:relative;overflow:hidden;}
+    .cad-tb{position:absolute;top:0;left:0;right:0;z-index:10;height:42px;background:rgba(7,15,18,.97);border-bottom:1px solid var(--br);display:flex;align-items:center;padding:0 12px;gap:3px;}
+    .ct{height:100%;display:flex;align-items:center;padding:0 12px;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border-right:1px solid var(--br);color:var(--ts);}
+    .ct.on{background:var(--td);color:var(--tg);}
+    .cad-tools{display:flex;align-items:center;gap:2px;padding:0 10px;}
+    .ctool{width:28px;height:26px;display:flex;align-items:center;justify-content:center;border:1px solid transparent;font-size:11px;color:var(--ts);transition:all .2s;}
+    .ctool:hover{border-color:var(--br);background:rgba(0,104,122,.1);color:var(--tb);}
+    .cad-browser{position:absolute;top:42px;left:0;bottom:30px;z-index:5;width:128px;background:rgba(4,10,12,.9);border-right:1px solid var(--br);padding:6px 0;font-size:10px;color:var(--ts);}
+    .bi{padding:4px 10px;display:flex;align-items:center;gap:4px;transition:background .15s;}
+    .bi:hover{background:rgba(0,104,122,.1);color:var(--tb);}
+    .bi.sel{color:var(--tg);}
+    #cad-vp{position:absolute;top:42px;left:128px;right:0;bottom:30px;}
+    #cad-vp canvas{width:100%!important;height:100%!important;}
+    .cad-hint{position:absolute;bottom:38px;right:10px;z-index:10;font-size:9px;color:var(--ts);text-align:right;line-height:1.8;pointer-events:none;letter-spacing:.06em;}
+    .cad-sb{position:absolute;bottom:0;left:0;right:0;height:30px;background:rgba(4,10,12,.96);border-top:1px solid var(--br);display:flex;align-items:center;gap:16px;padding:0 12px;font-size:9px;color:var(--ts);}
+    .cad-sb span{color:var(--tb);}
+    .vcube{position:absolute;top:50px;right:10px;z-index:10;width:50px;height:50px;}
+
+    /* SECTIONS */
+    .sec{padding:80px 8%;position:relative;}
+    .sl{font-size:10px;color:var(--tb);letter-spacing:.2em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+    .sl::before{content:"//";color:rgba(0,104,122,.4);}
+    h2{font-family:'Rajdhani',sans-serif;font-size:clamp(28px,4vw,48px);font-weight:700;color:var(--wh);letter-spacing:-.5px;margin-bottom:36px;line-height:1.1;}
+    h2 .ac{color:var(--tb);}
+
+    /* DISSERTATION */
+    #diss{background:var(--dk);}
+    .diss-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:60px;align-items:start;}
+    .diss-quote{font-size:14px;color:var(--tm);line-height:1.9;border-left:2px solid var(--teal);padding-left:18px;margin-bottom:20px;font-style:italic;}
+    .diss-body{color:var(--tm);font-size:13px;line-height:1.9;margin-bottom:16px;}
+    .diss-body strong{color:var(--wh);}
+    .dtags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:24px;}
+    .dtag{padding:4px 12px;border:1px solid var(--br);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--tb);background:rgba(0,104,122,.08);}
+    .spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--br);border:1px solid var(--br);margin-bottom:20px;}
+    .sc{padding:11px 14px;background:rgba(7,15,18,.98);}
+    .sk{font-size:9px;color:var(--ts);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;}
+    .sv{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;color:var(--wh);}
+
+    /* VIEWER (diss + modal) */
+    .vwr-top{background:rgba(7,15,18,.98);border:1px solid var(--br);border-bottom:none;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;}
+    .vwr-ttl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--tb);}
+    .vwr-btns{display:flex;gap:6px;}
+    .vb{font-size:9px;padding:3px 8px;border:1px solid var(--br);color:var(--ts);background:none;font-family:'JetBrains Mono',monospace;transition:all .2s;cursor:none;}
+    .vb:hover,.vb.on{background:rgba(0,104,122,.25);border-color:var(--teal);color:var(--tg);}
+    .vwr-body{position:relative;border:1px solid var(--br);overflow:hidden;background:#040c0f;}
+    .vwr-body canvas{display:block;cursor:grab;}
+    .vwr-body canvas:active{cursor:grabbing;}
+    .vco{position:absolute;pointer-events:none;}
+    .vco.tl{top:8px;left:8px;width:16px;height:16px;border-top:1.5px solid var(--teal);border-left:1.5px solid var(--teal);}
+    .vco.br{bottom:8px;right:8px;width:16px;height:16px;border-bottom:1.5px solid var(--teal);border-right:1.5px solid var(--teal);}
+    .vwr-lbl{position:absolute;bottom:10px;left:10px;font-size:9px;color:var(--ts);line-height:1.8;pointer-events:none;}
+    .vwr-lbl span{color:var(--tb);}
+    .vwr-axes{position:absolute;top:10px;right:10px;font-size:9px;line-height:1.8;text-align:right;pointer-events:none;}
+    .ax{display:block;}
+    .ax-x{color:#ff7070;}.ax-y{color:#70e070;}.ax-z{color:#7090ff;}
+    .vwr-ft{background:rgba(7,15,18,.98);border:1px solid var(--br);border-top:none;padding:5px 14px;display:flex;gap:18px;font-size:9px;color:var(--ts);}
+    .vwr-ft span{color:var(--tb);}
+
+    /* PROJECTS */
+    #proj{background:var(--bk);}
+    .proj-note{font-size:11px;color:var(--ts);margin-bottom:18px;}
+    .proj-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:16px;}
+    .pcard{border:1px solid var(--br);background:rgba(8,16,20,.92);transition:transform .25s,border-color .25s,box-shadow .25s;overflow:hidden;cursor:none;}
+    .pcard:hover,.pcard.on{transform:translateY(-3px);border-color:var(--tb);box-shadow:0 10px 22px rgba(0,104,122,.22);}
+    .pm{position:relative;aspect-ratio:16/10;background:linear-gradient(140deg,#0b1b20,#071015);border-bottom:1px solid var(--br);overflow:hidden;}
+    .pm canvas{width:100%!important;height:100%!important;display:block;}
+    .pbadge{position:absolute;top:6px;left:6px;font-size:9px;padding:2px 7px;background:rgba(0,104,122,.9);border:1px solid var(--teal);color:var(--tg);letter-spacing:.1em;text-transform:uppercase;z-index:2;}
+    .popen{position:absolute;top:6px;right:6px;font-size:9px;padding:3px 8px;background:rgba(0,104,122,.9);border:1px solid var(--tb);color:var(--tg);letter-spacing:.08em;text-transform:uppercase;opacity:0;transition:opacity .25s;z-index:2;cursor:none;}
+    .pcard:hover .popen{opacity:1;}
+    .pb{padding:10px 12px 14px;}
+    .pt{color:#d4edf2;font-size:13px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px;font-family:'Rajdhani',sans-serif;font-weight:700;}
+    .pd{color:var(--ts);font-size:10px;line-height:1.6;}
+    .ptags{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px;}
+    .ptg{font-size:9px;padding:2px 7px;border:1px solid var(--br);color:var(--ts);}
+
+    /* SIMULATOR */
+    .sim{width:100%;height:580px;background:var(--dk);border:1px solid var(--teal);display:flex;overflow:hidden;box-shadow:0 0 40px rgba(0,104,122,.12);}
+    .sim-side{width:210px;background:rgba(4,10,12,.95);border-right:1px solid var(--br);padding:14px;display:flex;flex-direction:column;flex-shrink:0;}
+    .sim-ttl{font-size:9px;color:var(--ts);letter-spacing:.15em;text-transform:uppercase;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--br);}
+    .psel{background:transparent;border:1px solid var(--br);color:var(--ts);padding:9px 11px;margin-bottom:5px;font-family:'JetBrains Mono',monospace;font-size:10px;text-align:left;transition:.2s;cursor:none;width:100%;}
+    .psel:hover,.psel.on{background:rgba(0,104,122,.22);color:var(--tg);border-color:var(--teal);}
+    .sim-inf{margin-top:auto;font-size:9px;color:rgba(90,138,148,.45);line-height:1.9;}
+    .sim-vp{flex:1;position:relative;background:#040b0e;overflow:hidden;}
+    .sim-vp canvas{display:block;}
+    .hud{position:absolute;padding:8px 12px;background:rgba(0,0,0,.7);border:1px solid var(--br);font-size:9px;pointer-events:none;text-transform:uppercase;letter-spacing:.07em;color:var(--ts);line-height:1.9;}
+    .hud.tr{top:14px;right:14px;text-align:right;}
+    .hud.bl{bottom:14px;left:14px;}
+    .hud .hv{color:var(--tb);}
+
+    /* MODAL */
+    .modal-ov{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px);}
+    .modal-ov.open{display:flex;}
+    .modal-win{width:90vw;max-width:1080px;height:84vh;background:var(--dk);border:1px solid var(--teal);display:flex;flex-direction:column;box-shadow:0 0 60px rgba(0,104,122,.25);}
+    .modal-bar{height:36px;background:rgba(7,15,18,.98);border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;padding:0 14px;flex-shrink:0;}
+    .modal-tabs{display:flex;}
+    .modal-tab{height:36px;display:flex;align-items:center;padding:0 16px;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border-right:1px solid var(--br);}
+    .modal-tab.on{background:var(--td);color:var(--tg);}
+    .modal-tab:not(.on){color:var(--ts);font-size:10px;}
+    .modal-x{width:28px;height:28px;border:1px solid var(--br);display:flex;align-items:center;justify-content:center;background:none;color:var(--ts);font-size:14px;font-family:inherit;transition:all .2s;cursor:none;}
+    .modal-x:hover{border-color:#ff6060;color:#ff6060;}
+    .modal-tools{height:38px;background:rgba(10,20,24,.98);border-bottom:1px solid var(--br);display:flex;align-items:center;padding:0 10px;gap:3px;flex-shrink:0;}
+    .mt{padding:4px 10px;font-size:10px;letter-spacing:.07em;text-transform:uppercase;border:1px solid transparent;color:var(--ts);background:none;font-family:'JetBrains Mono',monospace;transition:all .2s;cursor:none;}
+    .mt:hover{border-color:var(--br);color:var(--tb);}
+    .mt.on{background:rgba(0,104,122,.25);border-color:var(--teal);color:var(--tg);}
+    .msep{width:1px;height:18px;background:var(--br);margin:0 5px;}
+    .modal-body{flex:1;display:flex;overflow:hidden;}
+    .modal-sb{width:155px;border-right:1px solid var(--br);background:rgba(4,10,12,.8);padding:6px 0;overflow-y:auto;flex-shrink:0;}
+    .msbl{padding:3px 10px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);}
+    .msbi{padding:5px 18px;font-size:10px;color:var(--ts);display:flex;align-items:center;gap:4px;transition:background .15s;cursor:none;}
+    .msbi:hover,.msbi.on{background:rgba(0,104,122,.12);color:var(--tb);}
+    .modal-vp{flex:1;position:relative;background:#050c0f;overflow:hidden;}
+    #modal-canvas{display:block;cursor:grab;}
+    #modal-canvas:active{cursor:grabbing;}
+    .mc-corner{position:absolute;width:18px;height:18px;pointer-events:none;}
+    .mc-tl{top:8px;left:8px;border-top:1.5px solid var(--teal);border-left:1.5px solid var(--teal);}
+    .mc-tr{top:8px;right:8px;border-top:1.5px solid var(--teal);border-right:1.5px solid var(--teal);}
+    .mc-bl{bottom:8px;left:8px;border-bottom:1.5px solid var(--teal);border-left:1.5px solid var(--teal);}
+    .mc-br{bottom:8px;right:8px;border-bottom:1.5px solid var(--teal);border-right:1.5px solid var(--teal);}
+    .modal-minfo{position:absolute;top:10px;left:10px;font-size:9px;color:var(--ts);line-height:2;pointer-events:none;}
+    .modal-minfo span{color:var(--tb);}
+    .modal-hint{position:absolute;bottom:10px;right:10px;font-size:9px;color:var(--ts);text-align:right;line-height:1.8;pointer-events:none;}
+    .modal-sb2{height:26px;background:rgba(7,15,18,.98);border-top:1px solid var(--br);display:flex;align-items:center;gap:14px;padding:0 14px;font-size:9px;color:var(--ts);flex-shrink:0;}
+    .modal-sb2 span{color:var(--tb);}
+
+    /* SKILLS */
+    #skills{background:var(--dk);}
+    .sk-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:18px;}
+    .skp{background:var(--pn);border:1px solid var(--br);padding:22px;position:relative;overflow:hidden;transition:transform .3s,border-color .3s,box-shadow .3s;}
+    .skp::before{content:"";position:absolute;inset:0;background:linear-gradient(145deg,rgba(0,168,192,.07),transparent 50%);opacity:0;transition:opacity .3s;pointer-events:none;}
+    .skp:hover{border-color:var(--tb);transform:translateY(-4px);box-shadow:0 12px 28px rgba(0,0,0,.4);}
+    .skp:hover::before{opacity:1;}
+    .skph{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;border-bottom:1px dashed var(--br);padding-bottom:10px;}
+    .skph h3{color:var(--tb);letter-spacing:1px;font-size:15px;}
+    .skcode{color:var(--ts);font-size:9px;letter-spacing:1px;}
+    .bar-item{margin-bottom:11px;}
+    .bar-row{display:flex;justify-content:space-between;margin-bottom:5px;}
+    .bar-name{font-size:11px;color:var(--tm);}
+    .bar-lv{font-size:10px;color:var(--tb);}
+    .bar-track{height:2px;background:rgba(0,104,122,.12);}
+    .bar-fill{height:100%;background:linear-gradient(to right,var(--teal),var(--tg));transition:width 1.2s ease;width:0;}
+    .skul{list-style:none;display:grid;gap:8px;font-size:12px;color:#b9c9cc;}
+    .skul li{display:flex;gap:8px;align-items:flex-start;}
+    .skul li::before{content:">";color:var(--teal);font-weight:700;line-height:1.4;flex-shrink:0;}
+    .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;}
+    .chip{border:1px solid var(--br);color:#98c8d1;background:rgba(0,104,122,.08);padding:5px 10px;font-size:10px;letter-spacing:.5px;text-transform:uppercase;transition:all .2s;}
+    .chip:hover{border-color:var(--tb);color:var(--wh);}
+
+    /* TIMELINE */
+    #exp{background:var(--bk);}
+    .timeline{display:flex;flex-direction:column;}
+    .tl-row{display:grid;grid-template-columns:170px 1px 1fr;gap:0 22px;margin-bottom:0;}
+    .tl-dt{text-align:right;padding:0 0 36px;}
+    .tl-dtm{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;color:var(--tb);}
+    .tl-dts{font-size:10px;color:var(--ts);margin-top:2px;}
+    .tl-line{background:var(--br);position:relative;}
+    .tl-dot{width:10px;height:10px;border-radius:50%;background:var(--teal);border:2px solid var(--tg);position:absolute;top:4px;left:50%;transform:translateX(-50%);box-shadow:0 0 10px rgba(0,212,240,.4);}
+    .tl-ct{padding:0 0 36px;}
+    .tl-role{font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;color:var(--wh);margin-bottom:2px;}
+    .tl-co{font-size:11px;color:var(--tb);letter-spacing:.1em;margin-bottom:8px;}
+    .tl-ul{font-size:12px;color:var(--tm);line-height:1.8;padding-left:16px;}
+    .tl-ul li{margin-bottom:4px;}
+
+    /* AWARDS */
+    .awards{display:flex;flex-wrap:wrap;gap:14px;margin-top:40px;}
+    .aw{flex:1;min-width:200px;border:1px solid var(--teal);background:rgba(0,104,122,.06);padding:22px;display:flex;align-items:flex-start;gap:14px;transition:all .3s;}
+    .aw:hover{background:rgba(0,104,122,.14);box-shadow:0 0 24px rgba(0,104,122,.18);}
+    .aw-ic{font-size:26px;flex-shrink:0;}
+    .aw-title{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:var(--wh);margin-bottom:3px;}
+    .aw-sub{font-size:11px;color:var(--ts);line-height:1.7;}
+
+    /* FOCUS BOX */
+    .fbox{background:linear-gradient(100deg,rgba(0,104,122,.12),transparent 60%);border-left:3px solid var(--teal);padding:32px 38px;margin:32px 0;}
+    .fbox-lbl{font-size:10px;color:var(--teal);letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px;}
+    .fbox h3{font-size:clamp(18px,3vw,30px);color:var(--wh);margin-bottom:12px;}
+    .fbox p{color:var(--tm);max-width:780px;line-height:1.9;font-size:13px;}
+    .fgrid{margin-top:22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;}
+    .fi{border:1px solid var(--br);background:rgba(0,0,0,.3);padding:13px 15px;font-size:11px;color:var(--tm);text-transform:uppercase;letter-spacing:1px;}
+
+    /* CONTACT */
+    #contact{background:var(--dk);}
+    .con-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:56px;align-items:start;}
+    .con-txt p{color:var(--tm);line-height:1.9;font-size:13px;margin-bottom:14px;}
+    .con-txt strong{color:var(--wh);}
+    .con-links{display:flex;flex-direction:column;gap:9px;margin-top:22px;}
+    .con-lnk{display:flex;align-items:center;gap:10px;padding:12px 18px;text-decoration:none;border:1px solid var(--br);color:var(--ts);font-size:11px;letter-spacing:.1em;text-transform:uppercase;transition:all .3s;}
+    .con-lnk:hover{border-color:var(--tb);color:var(--wh);background:rgba(0,104,122,.08);}
+    .con-card{border:1px solid var(--br);background:var(--pn);}
+    .con-ch{padding:12px 18px;background:rgba(0,104,122,.1);border-bottom:1px solid var(--br);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:var(--tb);letter-spacing:1px;}
+    .con-cb{padding:18px;display:grid;gap:13px;}
+    .ci{display:flex;gap:12px;align-items:flex-start;padding-bottom:13px;border-bottom:1px solid var(--br);}
+    .ci:last-child{padding-bottom:0;border-bottom:none;}
+    .ci-ic{color:var(--tb);font-size:15px;flex-shrink:0;}
+    .ci-lb{font-size:9px;color:var(--ts);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;}
+    .ci-vl{font-size:13px;color:var(--wh);}
+
+    footer{padding:44px;text-align:center;border-top:1px solid var(--br);color:var(--ts);font-size:10px;}
+
+    /* REVEAL */
+    .rev{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease;transition-delay:var(--rd,0ms);}
+    .rev.vis{opacity:1;transform:none;}
+
+    @media(max-width:880px){
+      nav{padding:0 20px;}
+      .nav-links{display:none;}
+      #hero{grid-template-columns:1fr;}
+      .hero-r{display:none;}
+      .hero-l{padding:40px 24px;}
+      .sec{padding:60px 5%;}
+      .diss-grid,.con-grid{grid-template-columns:1fr;}
+      .tl-row{grid-template-columns:1fr;}
+      .tl-dt{text-align:left;padding-bottom:6px;}
+      .tl-line{display:none;}
+      .sim{flex-direction:column;height:auto;}
+      .sim-side{width:100%;height:auto;}
+      .sim-vp{height:360px;}
+      body{cursor:auto;}
+      .cur-d,.cur-r{display:none;}
+      a,button{cursor:auto;}
+    }
+  </style>
+</head>
+<body>
+<div class="cur-d"></div>
+<div class="cur-r"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">TZOULIANO<span>.DEV</span></div>
+  <div class="nav-links">
+    <a href="#hero"    class="nav-lnk">Home</a>
+    <a href="#diss"    class="nav-lnk">Thesis</a>
+    <a href="#proj"    class="nav-lnk">Projects</a>
+    <a href="#skills"  class="nav-lnk">Skills</a>
+    <a href="#exp"     class="nav-lnk">Experience</a>
+    <a href="#contact" class="nav-lnk">Contact</a>
+  </div>
+  <div class="nav-st"><div class="nav-dot"></div>ATHENS, GR — AVAILABLE</div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section id="hero">
+  <div class="hero-l">
+    <div class="hero-badge">Industrial Designer &amp; CAD Specialist</div>
+    <h1>DIMITRIS<br/><span class="ac">TZOULIANO</span></h1>
+    <div class="hero-role">Robotics · Mechanical Design · Fabrication · STEM</div>
+    <p class="hero-desc">Industrial Engineer specializing in 3D parametric CAD, functional robotic systems, and high-precision fabrication — from cycloidal gearboxes to full 6-DOF robotic arms.</p>
+    <div class="hero-metrics">
+      <div><div class="mv">5+</div><div class="ml">Years Fusion 360</div></div>
+      <div><div class="mv">6‑DOF</div><div class="ml">Robot Designed</div></div>
+      <div><div class="mv">2×</div><div class="ml">WRO Champion</div></div>
+    </div>
+    <div class="hero-cta">
+      <a href="#proj"    class="btn btn-p">View Projects</a>
+      <a href="#contact" class="btn btn-g">Contact Me</a>
+    </div>
+  </div>
+
+  <!-- CAD Panel -->
+  <div class="hero-r">
+    <div class="cad-tb">
+      <div class="ct on">SOLID</div>
+      <div class="ct">SURFACE</div>
+      <div class="ct">SHEET METAL</div>
+      <div class="cad-tools">
+        <div class="ctool">⬢</div><div class="ctool">⊙</div>
+        <div class="ctool">⚙</div><div class="ctool">🔍</div>
+      </div>
+      <div style="margin-left:auto;font-size:10px;color:var(--ts);letter-spacing:.06em;padding-right:8px;">FUSION 360 SIM</div>
+    </div>
+    <div class="cad-browser">
+      <div class="bi sel">▾ Robot_Arm_v4</div>
+      <div class="bi" style="padding-left:20px">▸ Bodies (6)</div>
+      <div class="bi" style="padding-left:20px">▸ Joints (5)</div>
+      <div class="bi" style="color:var(--tg);padding-left:20px">◆ Base</div>
+      <div class="bi" style="color:var(--tg);padding-left:20px">◆ J1_Shaft</div>
+      <div class="bi" style="color:var(--tg);padding-left:20px">◆ Cycloid_30</div>
+      <div class="bi" style="color:var(--tg);padding-left:20px">◆ J2_Link</div>
+      <div class="bi" style="color:var(--tg);padding-left:20px">◆ EE_Grip</div>
+      <div class="bi" style="padding-left:20px">▸ Named Views</div>
+      <div class="bi">▸ Origin</div>
+    </div>
+    <div id="cad-vp"></div>
+    <div class="vcube" id="vcube">
+      <svg viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="25,4 46,15 46,35 25,46 4,35 4,15" fill="rgba(0,104,122,.1)" stroke="rgba(0,168,192,.35)" stroke-width=".8"/>
+        <polygon points="25,4 46,15 25,26 4,15"  fill="rgba(0,104,122,.18)" stroke="rgba(0,168,192,.25)" stroke-width=".8"/>
+        <polygon points="4,15 25,26 25,46 4,35"  fill="rgba(0,104,122,.1)"  stroke="rgba(0,168,192,.25)" stroke-width=".8"/>
+        <polygon points="46,15 25,26 25,46 46,35" fill="rgba(0,104,122,.22)" stroke="rgba(0,168,192,.25)" stroke-width=".8"/>
+        <text x="25" y="19" text-anchor="middle" fill="rgba(0,212,240,.7)" font-size="5" font-family="monospace">TOP</text>
+        <text x="13" y="34" text-anchor="middle" fill="rgba(0,212,240,.5)" font-size="4" font-family="monospace">FRONT</text>
+        <text x="37" y="34" text-anchor="middle" fill="rgba(0,212,240,.5)" font-size="4" font-family="monospace">RIGHT</text>
+      </svg>
+    </div>
+    <div class="cad-hint">DRAG — ORBIT<br/>SCROLL — ZOOM<br/>RIGHT-DRAG — PAN</div>
+    <div class="cad-sb">
+      <span>Units: mm</span>
+      <span id="cad-xyz">X: 0.00&nbsp; Y: 0.00&nbsp; Z: 0.00</span>
+      <span style="margin-left:auto">SOLID MODE · AUTO-ANIMATE</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ DISSERTATION ═══ -->
+<section id="diss" class="sec">
+  <div class="rev"><div class="sl">Featured Work — Bachelor's Thesis · UNIWA 2026</div>
+  <h2>6-Axis Industrial <span class="ac">Robotic Arm</span></h2></div>
+  <div class="diss-grid rev" style="--rd:70ms">
+    <div>
+      <div class="diss-quote">"Design and Development of a 3D Printed Industrial Robotic Arm with Automatic Tool Change Capability"</div>
+      <p class="diss-body">A full design-to-prototype development of a six-degree-of-freedom (6-DOF) educational robotic manipulator — an open, affordable platform for robotics, mechatronics, and programming education.</p>
+      <p class="diss-body">The arm uses <strong>stepper motors paired with custom 30:1 cycloidal reducers</strong> engineered from scratch in Fusion 360. The cycloidal gearbox — featuring dual hypocycloid discs, eccentric cam, ball bearing housing, and output rollers — delivers high torque with exceptional precision and minimal backlash.</p>
+      <p class="diss-body">All components were manufactured via <strong>FDM 3D printing in PLA+</strong>, controlled through an <strong>Arduino platform</strong> with forward kinematics implementation.</p>
+      <div class="dtags">
+        <span class="dtag">6-DOF</span><span class="dtag">Fusion 360</span><span class="dtag">Cycloidal Drive 30:1</span>
+        <span class="dtag">Stepper Motors</span><span class="dtag">Arduino</span><span class="dtag">PLA+ FDM</span><span class="dtag">Mechatronics</span>
+      </div>
+      <div class="spec-grid">
+        <div class="sc"><div class="sk">Degrees of Freedom</div><div class="sv">6-DOF</div></div>
+        <div class="sc"><div class="sk">Gear Reduction</div><div class="sv">30:1 Cycloidal</div></div>
+        <div class="sc"><div class="sk">Actuators</div><div class="sv">Stepper Motors</div></div>
+        <div class="sc"><div class="sk">Controller</div><div class="sv">Arduino</div></div>
+        <div class="sc"><div class="sk">Material</div><div class="sv">PLA+ via FDM</div></div>
+        <div class="sc"><div class="sk">CAD Platform</div><div class="sv">Fusion 360</div></div>
+        <div class="sc"><div class="sk">Institution</div><div class="sv">UNIWA Athens</div></div>
+        <div class="sc"><div class="sk">Completed</div><div class="sv">March 2026</div></div>
+      </div>
+      <div style="margin-top:18px">
+        <a href="https://drive.google.com/drive/folders/1lYZOdi8FPxRSfZiqrCtNJzqlTsP929-H" target="_blank" class="btn btn-p" style="font-size:11px">View Full Thesis ↗</a>
+      </div>
+    </div>
+    <!-- Diss viewer -->
+    <div>
+      <div class="vwr-top">
+        <span class="vwr-ttl">◆ CYCLOID REDUCER — 30:1 // Interactive</span>
+        <div class="vwr-btns">
+          <button class="vb on" onclick="dissView('persp',this)">PERSP</button>
+          <button class="vb"    onclick="dissView('front',this)">FRONT</button>
+          <button class="vb"    onclick="dissView('top',this)">TOP</button>
+          <button class="vb"    onclick="dissView('explode',this)" id="exbtn">EXPLODE</button>
+        </div>
+      </div>
+      <div class="vwr-body" style="height:370px">
+        <canvas id="diss-cv"></canvas>
+        <div class="vco tl"></div><div class="vco br"></div>
+        <div class="vwr-lbl"><span>Model:</span> Cycloidal_Reducer_30-1<br/><span>Parts:</span> 14 · PLA+ / Steel Bearings<br/><span>Ratio:</span> 30:1</div>
+        <div class="vwr-axes"><span class="ax ax-x">X ──</span><span class="ax ax-y">Y ──</span><span class="ax ax-z">Z ──</span></div>
+      </div>
+      <div class="vwr-ft"><span>Verts:</span>~12,400 &nbsp;<span>Faces:</span>~6,200 &nbsp;<span>Bodies:</span>14 &nbsp;<span>Unit:</span>mm</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PROJECTS ═══ -->
+<section id="proj" class="sec">
+  <div class="rev"><div class="sl">Portfolio</div><h2>Design <span class="ac">Projects</span></h2>
+  <p class="proj-note">// Click any card to open the interactive 3D viewer · Drag to orbit · Scroll to zoom · Right-drag to pan</p></div>
+  <div class="proj-gallery rev" id="pg" style="--rd:50ms"></div>
+  <div class="sim rev" style="--rd:90ms">
+    <div class="sim-side">
+      <div class="sim-ttl">// 3D File Browser</div>
+      <button class="psel on"  onclick="simLoad('arm',this)">6_AXIS_ROBOT.asm</button>
+      <button class="psel"     onclick="simLoad('cycloid',this)">CYCLOIDAL_REDUCER.step</button>
+      <button class="psel"     onclick="simLoad('rover',this)">ROVER_PLATFORM.asm</button>
+      <button class="psel"     onclick="simLoad('goldarm',this)">GOLD_ARM.f3d</button>
+      <button class="psel"     onclick="simLoad('redarm',this)">RED_ARM.step</button>
+      <button class="psel"     onclick="simLoad('drivetrain',this)">DRIVETRAIN.asm</button>
+      <button class="psel"     onclick="simLoad('basebot',this)">MOBILE_BASE.f3d</button>
+      <div class="sim-inf">ENGINE: Three.js R128<br/>CONTROLS: OrbitControls<br/>MODE: Orbit / Zoom / Pan<br/>GRID: 10×10 mm</div>
+    </div>
+    <div class="sim-vp" id="sim-vp">
+      <div class="hud tr">CAMERA: <span class="hv">ORBIT</span><br/>RENDER: <span class="hv">REALTIME</span></div>
+      <div class="hud bl" id="sim-status">LOADED: <span class="hv">6_AXIS_ROBOT.asm</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ MODAL ═══ -->
+<div class="modal-ov" id="modal">
+  <div class="modal-win">
+    <div class="modal-bar">
+      <div class="modal-tabs">
+        <div class="modal-tab on"  id="mtab-name">VIEWER</div>
+        <div class="modal-tab"     id="mtab-sub"  style="padding:0 10px;font-size:10px"></div>
+      </div>
+      <button class="modal-x" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-tools">
+      <button class="mt on" id="mt-orb" onclick="mTool('orbit')">ORBIT</button>
+      <button class="mt"    id="mt-zm"  onclick="mTool('zoom')">ZOOM</button>
+      <button class="mt"    id="mt-pan" onclick="mTool('pan')">PAN</button>
+      <div class="msep"></div>
+      <button class="mt" onclick="mReset()">HOME</button>
+      <button class="mt" onclick="mView('front')">FRONT</button>
+      <button class="mt" onclick="mView('top')">TOP</button>
+      <button class="mt" onclick="mView('right')">RIGHT</button>
+      <div class="msep"></div>
+      <button class="mt" id="mt-wire" onclick="mWire()">WIREFRAME</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-sb" id="msb"></div>
+      <div class="modal-vp">
+        <canvas id="modal-canvas"></canvas>
+        <div class="mc-corner mc-tl"></div><div class="mc-corner mc-tr"></div>
+        <div class="mc-corner mc-bl"></div><div class="mc-corner mc-br"></div>
+        <div class="modal-minfo" id="minfo"><span>Model:</span> —<br/><span>Faces:</span> —<br/><span>Unit:</span> mm</div>
+        <div class="modal-hint">DRAG — ORBIT<br/>SCROLL — ZOOM<br/>RIGHT-DRAG — PAN</div>
+      </div>
+    </div>
+    <div class="modal-sb2"><span>STATUS:</span>READY &nbsp;|&nbsp;<span>TOOL:</span><span id="mst-tool">ORBIT</span>&nbsp;|&nbsp;<span id="mst-xyz">X:0 Y:0 Z:0</span></div>
+  </div>
+</div>
+
+<!-- ═══ SKILLS ═══ -->
+<section id="skills" class="sec">
+  <div class="rev"><div class="sl">Expertise</div><h2>Skills &amp; <span class="ac">Toolset</span></h2></div>
+  <div class="sk-grid">
+    <div class="skp rev" style="--rd:40ms">
+      <div class="skph"><h3>CAD Software</h3><span class="skcode">MODULE_A01</span></div>
+      <div class="bar-item"><div class="bar-row"><span class="bar-name">Autodesk Fusion 360</span><span class="bar-lv">Expert — 5+ yrs</span></div><div class="bar-track"><div class="bar-fill" data-w="97"></div></div></div>
+      <div class="bar-item"><div class="bar-row"><span class="bar-name">Metalix CAD/CAM</span><span class="bar-lv">Proficient</span></div><div class="bar-track"><div class="bar-fill" data-w="80"></div></div></div>
+      <div class="bar-item"><div class="bar-row"><span class="bar-name">Siemens NX</span><span class="bar-lv">Proficient</span></div><div class="bar-track"><div class="bar-fill" data-w="72"></div></div></div>
+      <div class="bar-item"><div class="bar-row"><span class="bar-name">SolidWorks</span><span class="bar-lv">Proficient</span></div><div class="bar-track"><div class="bar-fill" data-w="68"></div></div></div>
+      <div class="bar-item"><div class="bar-row"><span class="bar-name">Onshape / Inventor</span><span class="bar-lv">Working</span></div><div class="bar-track"><div class="bar-fill" data-w="62"></div></div></div>
+    </div>
+    <div class="skp rev" style="--rd:80ms">
+      <div class="skph"><h3>Design Domains</h3><span class="skcode">MODULE_B07</span></div>
+      <ul class="skul">
+        <li>6-DOF robotic arms, SCARA, delta, and gantry systems.</li>
+        <li>Cycloidal reducers, gear trains, and linkage systems.</li>
+        <li>Sheet metal DFM, unfolding, and CNC-ready documentation.</li>
+        <li>Functional assembly design with kinematics awareness.</li>
+        <li>CAD animation and assembly simulation workflows.</li>
+        <li>Educational robotics kit design for STEM platforms.</li>
+        <li>Design for manufacturing (DFM) and prototyping optimization.</li>
+      </ul>
+    </div>
+    <div class="skp rev" style="--rd:120ms">
+      <div class="skph"><h3>Fabrication</h3><span class="skcode">MODULE_C12</span></div>
+      <div class="bar-item"><div class="bar-row"><span class="bar-name">FDM 3D Printing</span><span class="bar-lv">Advanced</span></div><div class="bar-track"><div class="bar-fill" data-w="93"></div></div></div>
+      <div class="bar-item"><div class="bar-row"><span class="bar-name">Laser Cutting</span><span class="bar-lv">Advanced</span></div><div class="bar-track"><div class="bar-fill" data-w="85"></div></div></div>
+      <div class="bar-item"><div class="bar-row"><span class="bar-name">CNC Sheet Metal</span><span class="bar-lv">Proficient</span></div><div class="bar-track"><div class="bar-fill" data-w="78"></div></div></div>
+      <div class="bar-item"><div class="bar-row"><span class="bar-name">Resin 3D Printing</span><span class="bar-lv">Working</span></div><div class="bar-track"><div class="bar-fill" data-w="60"></div></div></div>
+      <div class="chips"><span class="chip">Bambu Studio</span><span class="chip">Cura</span><span class="chip">LightBurn</span><span class="chip">LaserGRBL</span><span class="chip">Chitubox</span><span class="chip">Metalix</span></div>
+    </div>
+    <div class="skp rev" style="--rd:160ms">
+      <div class="skph"><h3>Programming &amp; Electronics</h3><span class="skcode">MODULE_D03</span></div>
+      <ul class="skul">
+        <li>Arduino, Raspberry Pi Pico, Micro:bit, LEGO EV3, Nezha.</li>
+        <li>Python and C++ for robotics control and prototyping.</li>
+        <li>Stepper motor control, motor drivers, sensor integration.</li>
+        <li>Circuit design for robotic systems (motors, drivers, actuators).</li>
+        <li>Kinematics fundamentals for robotic motion planning.</li>
+      </ul>
+      <div class="chips" style="margin-top:14px"><span class="chip">Arduino</span><span class="chip">Python</span><span class="chip">C++</span><span class="chip">Raspberry Pi Pico</span><span class="chip">Micro:bit</span><span class="chip">EV3</span></div>
+    </div>
+  </div>
+  <div class="fbox rev" style="--rd:100ms">
+    <div class="fbox-lbl">[ PASSION_AND_FOCUS ]</div>
+    <h3>Robotics, Mechanical Design &amp; Manufacturable Innovation</h3>
+    <p>I specialize in robotics and mechanical design, combining CAD, electronics, and programming to create functional, elegant systems. I bring an engineering mindset focused on precision, practical execution, and design for manufacturing — from concept to prototype.</p>
+    <div class="fgrid">
+      <div class="fi">Industrial-Style Robotic Arms</div>
+      <div class="fi">Cycloidal Drives + Precision Mechanisms</div>
+      <div class="fi">STEM Educational Robotics Kits</div>
+      <div class="fi">DFM — Design for Manufacturing</div>
+      <div class="fi">Sheet Metal + Laser Fabrication</div>
+      <div class="fi">CAD to Functional Prototype</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ EXPERIENCE ═══ -->
+<section id="exp" class="sec">
+  <div class="rev"><div class="sl">Career</div><h2>Professional <span class="ac">Experience</span></h2></div>
+  <div class="timeline rev" style="--rd:50ms">
+    <div class="tl-row">
+      <div class="tl-dt"><div class="tl-dtm">2023 – 2024</div><div class="tl-dts">Full-time</div></div>
+      <div class="tl-line"><div class="tl-dot"></div></div>
+      <div class="tl-ct">
+        <div class="tl-role">CAD Designer &amp; Metalwork Detailer</div>
+        <div class="tl-co">◆ XENEX STEEL — Athens, Greece</div>
+        <ul class="tl-ul">
+          <li>Specialized in CNC nesting operations — developing efficient sheet metal nesting layouts for laser cutting to maximize material utilization.</li>
+          <li>Produced 2D fabrication and cutting drawings using Metalix CAD/CAM, including sheet metal unfolding and part preparation.</li>
+          <li>Utilized Siemens NX for 3D solid part modeling in an industrial production context.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-dt"><div class="tl-dtm">2022 – Present</div><div class="tl-dts">Freelance</div></div>
+      <div class="tl-line"><div class="tl-dot"></div></div>
+      <div class="tl-ct">
+        <div class="tl-role">Robotics Designer &amp; Programmer</div>
+        <div class="tl-co">◆ INDEPENDENT / FREELANCE</div>
+        <ul class="tl-ul">
+          <li>Design and development of custom robotic educational kits combining 3D-printed parts, laser-cut components, and programmable controllers.</li>
+          <li>Engineered mechanical components and assembly animations in Fusion 360 for STEM learning applications.</li>
+          <li>Designed articulated mechanisms, gear trains, and linkage systems for functional prototype builds.</li>
+          <li>Created production-ready models optimized for FDM and resin 3D printing processes.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-dt"><div class="tl-dtm">2022 – 2024</div><div class="tl-dts">Education</div></div>
+      <div class="tl-line"><div class="tl-dot"></div></div>
+      <div class="tl-ct">
+        <div class="tl-role">Robotics &amp; CAD Instructor</div>
+        <div class="tl-co">◆ STEM EDUCATION CENTER</div>
+        <ul class="tl-ul">
+          <li>Delivered structured training in Autodesk Fusion 360, Onshape, and Tinkercad to students aged 10–18.</li>
+          <li>Designed and facilitated hands-on robotics workshops using Micro:Bit, LEGO EV3, Nezha, and Wukong platforms.</li>
+          <li>Developed curriculum materials and step-by-step project guides for progressive skill acquisition.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="rev" style="--rd:60ms;margin-top:56px"><div class="sl">Recognition</div><h2 style="margin-bottom:0">Awards &amp; <span class="ac">Achievements</span></h2></div>
+  <div class="awards rev" style="--rd:80ms">
+    <div class="aw"><div class="aw-ic">🏆</div><div><div class="aw-title">2× National Champion</div><div class="aw-sub">World Robot Olympiad (WRO) — Greece<br/>2016 &amp; 2017</div></div></div>
+    <div class="aw"><div class="aw-ic">🌍</div><div><div class="aw-title">International Finalist — Top 20</div><div class="aw-sub">WRO World Finals<br/>Qatar (2016) &amp; India (2017)</div></div></div>
+    <div class="aw"><div class="aw-ic">🎓</div><div><div class="aw-title">B.Sc. Industrial Design &amp; Production Engineering</div><div class="aw-sub">University of West Attica (UNIWA)<br/>Graduation: 2026</div></div></div>
+  </div>
+</section>
+
+<!-- ═══ CONTACT ═══ -->
+<section id="contact" class="sec">
+  <div class="rev"><div class="sl">Connect</div><h2>Let's <span class="ac">Collaborate</span></h2></div>
+  <div class="con-grid rev" style="--rd:50ms">
+    <div class="con-txt">
+      <p>I'm an <strong>Industrial Designer and CAD Specialist</strong> based in Athens, Greece — completing my Bachelor's thesis and open to new opportunities in mechanical design, robotics engineering, and STEM education.</p>
+      <p>Whether it's a robotic arm, a custom educational kit, a cycloidal gearbox, or production-ready sheet metal drawings — I bring precision, creativity, and a deep engineering mindset to every project.</p>
+      <p>Fast learner with strong adaptability. Available for <strong>freelance, part-time, or full-time</strong> roles in Greece or remotely.</p>
+      <div class="con-links">
+        <a href="https://drive.google.com/drive/folders/1lHJeAkbNxlRcj7lwA0jnDfYoTA1z4R6-" target="_blank" class="con-lnk">◆ Full Portfolio — Google Drive ↗</a>
+        <a href="https://drive.google.com/drive/folders/1lYZOdi8FPxRSfZiqrCtNJzqlTsP929-H" target="_blank" class="con-lnk">◆ Bachelor's Thesis — Full Document ↗</a>
+      </div>
+    </div>
+    <div class="con-card">
+      <div class="con-ch">// CONTACT_INFO.json</div>
+      <div class="con-cb">
+        <div class="ci"><div class="ci-ic">📍</div><div><div class="ci-lb">Location</div><div class="ci-vl">Athens, Greece</div></div></div>
+        <div class="ci"><div class="ci-ic">📞</div><div><div class="ci-lb">Phone</div><div class="ci-vl">+30 697 475 7694</div></div></div>
+        <div class="ci"><div class="ci-ic">🗣</div><div><div class="ci-lb">Languages</div><div class="ci-vl">Greek (Native) · English (Professional) · Italian (Intermediate)</div></div></div>
+        <div class="ci"><div class="ci-ic">🎯</div><div><div class="ci-lb">Specialization</div><div class="ci-vl">Robotic Arms · Mechanical Design · DFM · STEM</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>&copy; 2026 DIMITRIS ANTONIO TZOULIANO &nbsp;//&nbsp; INDUSTRIAL DESIGNER &amp; CAD SPECIALIST &nbsp;//&nbsp; BUILT WITH CAD &amp; CODE</footer>
+
+<script>
+// ─────────────────────────────────────────────────
+//  SHARED HELPERS
+// ─────────────────────────────────────────────────
+function lights(scene){
+  scene.add(new THREE.AmbientLight(0xaaccdd,0.75));
+  var d1=new THREE.DirectionalLight(0xffffff,1.3); d1.position.set(6,9,5); scene.add(d1);
+  var d2=new THREE.DirectionalLight(0x00d4f0,0.45); d2.position.set(-5,-3,-4); scene.add(d2);
+  var pt=new THREE.PointLight(0x00a8c0,0.55,30); pt.position.set(0,7,0); scene.add(pt);
+}
+function grid(sz,div){ return new THREE.GridHelper(sz,div,0x00a8c0,0x0a1e26); }
+
+// Material palette — vivid and visible
+var M={
+  teal:  function(){ return new THREE.MeshStandardMaterial({color:0x00a8c0,metalness:.6,roughness:.25}); },
+  tealD: function(){ return new THREE.MeshStandardMaterial({color:0x007a8f,metalness:.5,roughness:.35}); },
+  tealL: function(){ return new THREE.MeshStandardMaterial({color:0x00d4f0,metalness:.65,roughness:.18}); },
+  silver:function(){ return new THREE.MeshStandardMaterial({color:0x90c8d8,metalness:.8, roughness:.2});  },
+  dark:  function(){ return new THREE.MeshStandardMaterial({color:0x0e2c36,metalness:.5, roughness:.5});  },
+  gold:  function(){ return new THREE.MeshStandardMaterial({color:0xe0b040,metalness:.75,roughness:.2});  },
+  red:   function(){ return new THREE.MeshStandardMaterial({color:0xe05858,metalness:.65,roughness:.28}); },
+  green: function(){ return new THREE.MeshStandardMaterial({color:0x38d080,metalness:.3, roughness:.6});  },
+};
+
+// Build geometry for each project type — returns THREE.Group
+function buildGeom(type){
+  var g=new THREE.Group();
+  if(type==='arm'||type==='robot'){
+    g.add(nm(new THREE.CylinderGeometry(.28,.34,.14,20), M.dark(), {y:-.62}));
+    g.add(nm(new THREE.CylinderGeometry(.15,.18,.22,16), M.tealD(),{y:-.46}));
+    var l1=nm(new THREE.BoxGeometry(.13,.62,.1),M.teal(),{y:-.06}); g.add(l1);
+    var l2=new THREE.Mesh(new THREE.BoxGeometry(.11,.46,.09),M.tealL()); l2.position.y=.48; l2.rotation.x=-.28; g.add(l2);
+    g.add(nm(new THREE.BoxGeometry(.09,.17,.08),M.tealD(),{y:.86}));
+    g.add(nm(new THREE.CylinderGeometry(.055,.055,.12,8),M.silver(),{y:1.02}));
+    var cr=new THREE.Mesh(new THREE.TorusGeometry(.2,.04,6,28),M.tealL()); cr.rotation.x=Math.PI/2; cr.position.y=-.36; g.add(cr);
+  } else if(type==='cycloid'){
+    var rg=new THREE.Mesh(new THREE.TorusGeometry(1.1,.18,14,52),new THREE.MeshStandardMaterial({color:0x004e62,metalness:.5,roughness:.4,transparent:true,opacity:.84})); rg.rotation.x=Math.PI/2; g.add(rg);
+    var dd=new THREE.Mesh(new THREE.CylinderGeometry(.83,.83,.09,10),M.teal()); dd.rotation.x=Math.PI/2; g.add(dd);
+    for(var i=0;i<7;i++){var a=(i/7)*Math.PI*2; var h=nm(new THREE.CylinderGeometry(.077,.077,.14,8),new THREE.MeshStandardMaterial({color:0x001015}),{x:Math.cos(a)*.48,y:Math.sin(a)*.48}); h.rotation.x=Math.PI/2; g.add(h);}
+    var ec=new THREE.Mesh(new THREE.CylinderGeometry(.27,.27,.1,22),M.tealL()); ec.rotation.x=Math.PI/2; ec.position.set(.53,.08,0); g.add(ec);
+    var bc=new THREE.Mesh(new THREE.TorusGeometry(.69,.1,10,42),M.teal()); bc.rotation.x=Math.PI/2; bc.position.x=-.62; g.add(bc);
+    for(var j=0;j<8;j++){var a2=(j/8)*Math.PI*2; g.add(nm(new THREE.SphereGeometry(.066,8,8),M.silver(),{x:Math.cos(a2)*.61,y:Math.sin(a2)*.61}));}
+  } else if(type==='rover'){
+    g.add(nm(new THREE.BoxGeometry(2.4,.4,1.4),M.teal(),{y:.55}));
+    g.add(nm(new THREE.CylinderGeometry(.07,.07,1.4,12),M.dark(),{y:1.45}));
+    g.add(nm(new THREE.BoxGeometry(.3,.25,.22),M.tealL(),{y:2.2}));
+    [[-1,-.6],[1,-.6],[-1,.6],[1,.6]].forEach(function(p){ var w=new THREE.Mesh(new THREE.TorusGeometry(.3,.09,10,22),M.silver()); w.position.set(p[0]*.95,.22,p[1]); w.rotation.y=Math.PI/2; g.add(w); });
+  } else if(type==='goldarm'){
+    g.add(nm(new THREE.CylinderGeometry(.32,.4,.22,18),M.dark(),{y:.1}));
+    g.add(nm(new THREE.CylinderGeometry(.14,.14,.28,16),M.gold(),{y:.4}));
+    g.add(nm(new THREE.BoxGeometry(1.4,.18,.18),M.gold(),{x:.68,y:.7}));
+    g.add(nm(new THREE.CylinderGeometry(.15,.15,.3,16),M.dark(),{x:1.35,y:.7}));
+    var l2g=nm(new THREE.BoxGeometry(.85,.14,.14),M.gold(),{x:1.85,y:.92}); l2g.rotation.z=-.32; g.add(l2g);
+    var cn=nm(new THREE.ConeGeometry(.08,.35,8),M.dark(),{x:2.22,y:.68}); cn.rotation.z=-Math.PI/2; g.add(cn);
+  } else if(type==='redarm'){
+    g.add(nm(new THREE.CylinderGeometry(.42,.55,.38,16),M.dark(),{y:.19}));
+    g.add(nm(new THREE.BoxGeometry(.5,1.65,.45),M.red(),{y:1.2}));
+    var sh=nm(new THREE.CylinderGeometry(.2,.2,.45,16),M.dark(),{x:.32,y:1.88}); sh.rotation.z=Math.PI/2; g.add(sh);
+    var fa=nm(new THREE.BoxGeometry(.22,1.1,.22),M.red(),{x:.78,y:2.38}); fa.rotation.z=-.32; g.add(fa);
+    g.add(nm(new THREE.CylinderGeometry(.12,.12,.28,12),M.tealL(),{x:.98,y:2.98}));
+  } else if(type==='drivetrain'){
+    g.add(nm(new THREE.BoxGeometry(1.75,.42,.5),M.teal(),{x:-1,y:.45}));
+    g.add(nm(new THREE.BoxGeometry(1.75,.42,.5),M.teal(),{x:1,y:.45}));
+    g.add(nm(new THREE.BoxGeometry(1.35,.22,.3),M.dark(),{y:.72}));
+    [-1.72,-.84,0,.84,1.72].forEach(function(x){ var p=nm(new THREE.CylinderGeometry(.14,.14,.22,16),M.silver(),{x:x,y:.45,z:.28}); p.rotation.z=Math.PI/2; g.add(p); });
+  } else if(type==='basebot'){
+    g.add(nm(new THREE.CylinderGeometry(.9,.9,.28,32),M.dark(),{y:.14}));
+    g.add(nm(new THREE.BoxGeometry(1.6,.07,1.6),M.green(),{y:.68}));
+    for(var k=0;k<4;k++){var ak=(k/4)*Math.PI*2; var s=nm(new THREE.CylinderGeometry(.09,.09,.25,10),M.tealL(),{x:Math.cos(ak)*.65,y:.35,z:Math.sin(ak)*.65}); s.rotation.x=Math.PI/2; g.add(s);}
+  } else { // fallback sheet
+    g.add(nm(new THREE.BoxGeometry(2,.05,1.4),M.silver(),{}));
+    g.add(nm(new THREE.BoxGeometry(2,.5,.05),M.tealD(),{y:.27,z:-.7}));
+    g.add(nm(new THREE.BoxGeometry(2,.5,.05),M.tealD(),{y:.27,z:.7}));
+  }
+  return g;
+}
+
+function nm(geo,mat,pos){
+  var m=new THREE.Mesh(geo,mat);
+  if(pos){m.position.set(pos.x||0,pos.y||0,pos.z||0);}
+  return m;
+}
+
+// ─────────────────────────────────────────────────
+//  HERO CAD SCENE
+// ─────────────────────────────────────────────────
+(function(){
+  var wrap=document.getElementById('cad-vp'); if(!wrap) return;
+  var sc=new THREE.Scene(); sc.background=new THREE.Color(0x030b0e);
+  lights(sc); sc.add(grid(14,28)); sc.add(new THREE.AxesHelper(1.5));
+
+  var W=wrap.clientWidth||500, H=wrap.clientHeight||400;
+  var cam=new THREE.PerspectiveCamera(46,W/H,.1,1000);
+  cam.position.set(3.8,3.2,4.5);
+
+  var ren=new THREE.WebGLRenderer({antialias:true});
+  ren.setSize(W,H); ren.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  ren.setClearColor(0x030b0e,1);
+  wrap.appendChild(ren.domElement);
+
+  var ctrl=new THREE.OrbitControls(cam,ren.domElement);
+  ctrl.enableDamping=true; ctrl.dampingFactor=.07;
+  ctrl.mouseButtons={LEFT:null,MIDDLE:THREE.MOUSE.DOLLY,RIGHT:THREE.MOUSE.ROTATE};
+
+  // Build the animated arm
+  var arm=buildGeom('arm'); arm.scale.setScalar(1.2); sc.add(arm);
+  // Extra decoration rings
+  var r1=new THREE.Mesh(new THREE.TorusGeometry(1.5,.01,4,60),new THREE.MeshBasicMaterial({color:0x004455})); r1.rotation.x=Math.PI/2; sc.add(r1);
+
+  var coordEl=document.getElementById('cad-xyz');
+  var t=0;
+  (function loop(){
+    requestAnimationFrame(loop); t+=.007;
+    // Animate joints
+    arm.children[2] && (arm.children[2].rotation.y=Math.sin(t*.5)*.3);
+    arm.children[3] && (arm.children[3].rotation.z=Math.sin(t*.4+1)*.22-.28);
+    arm.children[5] && (arm.children[5].rotation.y=Math.sin(t*.7)*.4);
+    arm.children[6] && (arm.children[6].rotation.z+=.005);
+    ctrl.update();
+    if(coordEl){var p=cam.position; coordEl.textContent='X:'+p.x.toFixed(2)+'  Y:'+p.y.toFixed(2)+'  Z:'+p.z.toFixed(2);}
+    var W2=wrap.clientWidth,H2=wrap.clientHeight;
+    if(ren.domElement.width!==W2||ren.domElement.height!==H2){ren.setSize(W2,H2);cam.aspect=W2/H2;cam.updateProjectionMatrix();}
+    ren.render(sc,cam);
+  })();
+})();
+
+// ─────────────────────────────────────────────────
+//  DISSERTATION CYCLOID VIEWER
+// ─────────────────────────────────────────────────
+var dissOrbit, dissCamera, dissRenderer, dissParts=[], dissExploded=false;
+var udDisc, ldDisc, bcRing;
+
+(function(){
+  var cv=document.getElementById('diss-cv'); if(!cv) return;
+  var wrap=cv.parentElement;
+  var W=wrap.clientWidth||500, H=370;
+  cv.width=W; cv.height=H;
+
+  var sc=new THREE.Scene(); sc.background=new THREE.Color(0x040c0f);
+  lights(sc); sc.add(grid(6,22));
+
+  dissCamera=new THREE.PerspectiveCamera(44,W/H,.01,200);
+  dissCamera.position.set(4,2.5,4);
+
+  dissRenderer=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+  dissRenderer.setSize(W,H,false);
+  dissRenderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+
+  dissOrbit=new THREE.OrbitControls(dissCamera,cv);
+  dissOrbit.enableDamping=true; dissOrbit.dampingFactor=.07;
+
+  var grp=new THREE.Group();
+
+  function p(mesh,x0){ mesh.position.x=x0; grp.add(mesh); dissParts.push({mesh:mesh,x0:x0}); return mesh; }
+
+  // Ring housing
+  var rg=new THREE.Mesh(new THREE.TorusGeometry(1.1,.18,14,52),new THREE.MeshStandardMaterial({color:0x005570,metalness:.5,roughness:.4,transparent:true,opacity:.84}));
+  rg.rotation.x=Math.PI/2; p(rg,0);
+  // Motor
+  var mh=new THREE.Mesh(new THREE.CylinderGeometry(.44,.44,.5,32),M.dark()); mh.rotation.x=Math.PI/2; p(mh,1.8);
+  // Shaft
+  var sh=new THREE.Mesh(new THREE.CylinderGeometry(.058,.058,.9,10),M.silver()); sh.rotation.x=Math.PI/2; p(sh,1.1);
+  // Eccentric cam
+  var ec=new THREE.Mesh(new THREE.CylinderGeometry(.28,.28,.11,22),M.tealL()); ec.rotation.x=Math.PI/2; ec.position.set(.53,.08,0); grp.add(ec); dissParts.push({mesh:ec,x0:.53});
+  // Cycloid discs
+  function cDisc(col,x0){
+    var dg=new THREE.Group();
+    var mat=new THREE.MeshStandardMaterial({color:col,metalness:.6,roughness:.28});
+    var d=new THREE.Mesh(new THREE.CylinderGeometry(.83,.83,.09,10),mat); d.rotation.x=Math.PI/2; dg.add(d);
+    for(var i=0;i<7;i++){var a=(i/7)*Math.PI*2; var h=new THREE.Mesh(new THREE.CylinderGeometry(.077,.077,.14,8),new THREE.MeshStandardMaterial({color:0x001015})); h.rotation.x=Math.PI/2; h.position.set(Math.cos(a)*.48,Math.sin(a)*.48,0); dg.add(h);}
+    p(dg,x0); return dg;
+  }
+  udDisc=cDisc(0x00c8e0,.14);
+  ldDisc=cDisc(0x0090aa,-.08);
+  // Output disc
+  var od=new THREE.Mesh(new THREE.CylinderGeometry(1.03,1.03,.07,48),M.tealD()); od.rotation.x=Math.PI/2; p(od,-.32);
+  // Ball bearing cap
+  bcRing=new THREE.Mesh(new THREE.TorusGeometry(.69,.095,10,42),M.teal()); bcRing.rotation.x=Math.PI/2; p(bcRing,-.62);
+  // Large bearing housing
+  var bh=new THREE.Mesh(new THREE.TorusGeometry(.94,.13,12,60),new THREE.MeshStandardMaterial({color:0x006880,metalness:.65,roughness:.3})); bh.rotation.x=Math.PI/2; p(bh,-.85);
+  // Rollers
+  for(var i=0;i<8;i++){var a=(i/8)*Math.PI*2; var r=new THREE.Mesh(new THREE.SphereGeometry(.066,10,10),M.silver()); r.position.set(Math.cos(a)*.61,Math.sin(a)*.61,0); grp.add(r); dissParts.push({mesh:r,x0:0});}
+  // Screws
+  for(var i=0;i<4;i++){var a=(i/4)*Math.PI*2; var s=new THREE.Mesh(new THREE.CylinderGeometry(.036,.036,.84,7),M.silver()); s.rotation.x=Math.PI/2; s.position.set(Math.cos(a)*.84,Math.sin(a)*.84,0); p(s,-.2);}
+
+  sc.add(grp);
+
+  (function loop(){
+    requestAnimationFrame(loop);
+    if(udDisc) udDisc.rotation.y+=.01;
+    if(ldDisc) ldDisc.rotation.y-=.007;
+    if(bcRing) bcRing.rotation.y+=.004;
+    var W2=wrap.clientWidth;
+    if(dissRenderer.domElement.width!==W2){dissRenderer.setSize(W2,H,false);dissCamera.aspect=W2/H;dissCamera.updateProjectionMatrix();}
+    dissOrbit.update();
+    dissRenderer.render(sc,dissCamera);
+  })();
+
+  setTimeout(function(){var W2=wrap.clientWidth;dissRenderer.setSize(W2,H,false);dissCamera.aspect=W2/H;dissCamera.updateProjectionMatrix();},200);
+})();
+
+window.dissView=function(v,btn){
+  document.querySelectorAll('.vb').forEach(function(b){b.classList.remove('on');});
+  if(btn) btn.classList.add('on');
+  if(!dissCamera) return;
+  if(v==='persp'){dissCamera.position.set(4,2.5,4);dissCamera.lookAt(0,0,0);}
+  else if(v==='front'){dissCamera.position.set(0,0,6);dissCamera.lookAt(0,0,0);}
+  else if(v==='top'){dissCamera.position.set(0,6,.01);dissCamera.lookAt(0,0,0);}
+  else if(v==='explode'){
+    dissExploded=!dissExploded;
+    var exbtn=document.getElementById('exbtn');
+    if(exbtn) exbtn.textContent=dissExploded?'ASSEMBLE':'EXPLODE';
+    dissParts.forEach(function(p,i){p.mesh.position.x=p.x0+(dissExploded?(i-dissParts.length/2)*.46:0);});
+  }
+};
+
+// ─────────────────────────────────────────────────
+//  PROJECT GALLERY + MINI CANVASES
+// ─────────────────────────────────────────────────
+var PROJ=[
+  {id:'cycloid',  model:'cycloid',   title:'Cycloidal Reducer 30:1',   desc:'Ring gear housing, dual discs, eccentric cam. Core thesis component.',  tags:['Fusion 360','Gearbox','FDM'], badge:'THESIS'},
+  {id:'rover',    model:'rover',     title:'Rover Platform',           desc:'Four-wheel robotic rover with sensor mast and modular frame.',           tags:['Arduino','Robotics'],          badge:'CONCEPT'},
+  {id:'goldarm',  model:'goldarm',   title:'Gold Arm Concept',         desc:'Compact horizontal articulated manipulator with tool end-effector.',     tags:['Fusion 360','SCARA'],          badge:'PORTFOLIO'},
+  {id:'redarm',   model:'redarm',    title:'Vertical Arm Assembly',    desc:'Vertical industrial-style arm with enclosed structural panels.',         tags:['6-DOF','FDM'],                 badge:'PORTFOLIO'},
+  {id:'drivetrain',model:'drivetrain',title:'Tracked Drivetrain',      desc:'Belt-driven module with dual-rail chassis and integrated pulleys.',      tags:['Metalix','Sheet Metal'],       badge:'FREELANCE'},
+  {id:'basebot',  model:'basebot',   title:'Mobile Base Platform',     desc:'Sensor-ready omni base with green electronics top deck.',               tags:['Arduino','Sensors'],           badge:'FREELANCE'},
+  {id:'arm',      model:'arm',       title:'6-DOF Robotic Arm',        desc:'Full 6-axis arm with cycloidal joints. Thesis primary deliverable.',    tags:['6-DOF','Arduino','Stepper'],   badge:'THESIS'},
+];
+
+var gallery=document.getElementById('pg');
+PROJ.forEach(function(pr,idx){
+  var card=document.createElement('article');
+  card.className='pcard';
+  card.innerHTML='<div class="pm"><canvas id="mc'+idx+'" width="220" height="138" style="width:100%;height:100%;display:block;"></canvas>'
+    +'<div class="pbadge">'+pr.badge+'</div>'
+    +'<div class="popen" onclick="openModal(\''+pr.id+'\');event.stopPropagation()">OPEN IN VIEWER ▶</div></div>'
+    +'<div class="pb"><div class="pt">'+pr.title+'</div><div class="pd">'+pr.desc+'</div>'
+    +'<div class="ptags">'+pr.tags.map(function(t){return '<span class="ptg">'+t+'</span>';}).join('')+'</div></div>';
+  card.addEventListener('click',function(){
+    simLoad(pr.model);
+    document.querySelectorAll('.pcard').forEach(function(c){c.classList.remove('on');});
+    card.classList.add('on');
+    document.querySelectorAll('.psel').forEach(function(b){b.classList.remove('on');});
+  });
+  gallery.appendChild(card);
+
+  setTimeout(function(){
+    var cv=document.getElementById('mc'+idx); if(!cv) return;
+    var sc2=new THREE.Scene(); sc2.background=new THREE.Color(0x050e12);
+    lights(sc2); sc2.add(grid(4,14));
+    var cam2=new THREE.PerspectiveCamera(44,220/138,.01,100);
+    cam2.position.set(2.2,1.6,2.2); cam2.lookAt(0,0,0);
+    var ren2=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+    ren2.setSize(220,138,false); ren2.setPixelRatio(Math.min(window.devicePixelRatio,2));
+    var obj2=buildGeom(pr.model); sc2.add(obj2);
+    var t2=idx*1.1;
+    (function l2(){requestAnimationFrame(l2);t2+=.012;obj2.rotation.y=t2;ren2.render(sc2,cam2);})();
+  },idx*80+400);
+});
+
+// ─────────────────────────────────────────────────
+//  MAIN SIMULATOR
+// ─────────────────────────────────────────────────
+var simRen,simCam,simCtrl,simObj;
+
+(function(){
+  var vp=document.getElementById('sim-vp'); if(!vp) return;
+  var sc=new THREE.Scene(); sc.background=new THREE.Color(0x040b0e);
+  lights(sc); sc.add(grid(12,24));
+
+  var W=vp.clientWidth||700, H=vp.clientHeight||580;
+  simCam=new THREE.PerspectiveCamera(44,W/H,.1,1000);
+  simCam.position.set(4.5,4,4.5);
+
+  simRen=new THREE.WebGLRenderer({antialias:true});
+  simRen.setSize(W,H); simRen.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  vp.appendChild(simRen.domElement);
+
+  simCtrl=new THREE.OrbitControls(simCam,simRen.domElement);
+  simCtrl.enableDamping=true; simCtrl.dampingFactor=.06;
+
+  simObj=buildGeom('arm'); simObj.scale.setScalar(1.5); sc.add(simObj);
+
+  var simSc=sc;
+  (function loop(){
+    requestAnimationFrame(loop);
+    if(simObj) simObj.rotation.y+=.003;
+    simCtrl.update();
+    var W2=vp.clientWidth,H2=vp.clientHeight;
+    if(simRen.domElement.width!==W2||simRen.domElement.height!==H2){simRen.setSize(W2,H2);simCam.aspect=W2/H2;simCam.updateProjectionMatrix();}
+    simRen.render(simSc,simCam);
+  })();
+  window._simScene=sc;
+})();
+
+var fileNames={arm:'6_AXIS_ROBOT.asm',cycloid:'CYCLOIDAL_REDUCER.step',rover:'ROVER_PLATFORM.asm',goldarm:'GOLD_ARM.f3d',redarm:'RED_ARM.step',drivetrain:'DRIVETRAIN.asm',basebot:'MOBILE_BASE.f3d'};
+
+window.simLoad=function(type,btn){
+  if(!window._simScene||!simObj) return;
+  window._simScene.remove(simObj);
+  simObj=buildGeom(type); simObj.scale.setScalar(1.5);
+  window._simScene.add(simObj);
+  var el=document.getElementById('sim-status');
+  if(el) el.innerHTML='LOADED: <span class="hv">'+(fileNames[type]||type)+'</span>';
+  if(btn){document.querySelectorAll('.psel').forEach(function(b){b.classList.remove('on');}); btn.classList.add('on');}
+};
+
+document.querySelectorAll('.psel').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.psel').forEach(function(b){b.classList.remove('on');});
+    this.classList.add('on');
+  });
+});
+
+// ─────────────────────────────────────────────────
+//  MODAL VIEWER
+// ─────────────────────────────────────────────────
+var mRen,mCam,mCtrl,mObj,mWireActive=false;
+var mSc,mInited=false;
+var mCurType='';
+
+function initModal(){
+  if(mInited) return;
+  var cv=document.getElementById('modal-canvas'); if(!cv) return;
+  var vp=cv.parentElement;
+  mSc=new THREE.Scene(); mSc.background=new THREE.Color(0x050c0f);
+  lights(mSc); mSc.add(grid(8,28));
+  var W=vp.clientWidth||800, H=vp.clientHeight||500;
+  mCam=new THREE.PerspectiveCamera(44,W/H,.01,200);
+  mCam.position.set(4,3,4);
+  mRen=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+  mRen.setSize(W,H,false); mRen.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  mCtrl=new THREE.OrbitControls(mCam,cv);
+  mCtrl.enableDamping=true; mCtrl.dampingFactor=.07;
+  (function loop(){
+    requestAnimationFrame(loop);
+    if(mObj) mObj.rotation.y+=.004;
+    mCtrl.update();
+    var W2=vp.clientWidth,H2=vp.clientHeight;
+    if(mRen.domElement.width!==W2||mRen.domElement.height!==H2){mRen.setSize(W2,H2,false);mCam.aspect=W2/H2;mCam.updateProjectionMatrix();}
+    if(mCam){var p=mCam.position;var el=document.getElementById('mst-xyz');if(el)el.textContent='X:'+p.x.toFixed(1)+' Y:'+p.y.toFixed(1)+' Z:'+p.z.toFixed(1);}
+    if(mSc&&mCam) mRen.render(mSc,mCam);
+  })();
+  mInited=true;
+}
+
+window.openModal=function(type){
+  initModal();
+  if(mObj){mSc.remove(mObj);mObj=null;}
+  mCurType=type;
+  mObj=buildGeom(type); mObj.scale.setScalar(1.6); mSc.add(mObj);
+  mWireActive=false;
+  var wbtn=document.getElementById('mt-wire'); if(wbtn) wbtn.classList.remove('on');
+  // Find project data
+  var pr=PROJ.find(function(p){return p.id===type;});
+  var nm2=pr?pr.title:type;
+  var nb=pr?pr.badge:'';
+  document.getElementById('mtab-name').textContent=nm2.toUpperCase();
+  document.getElementById('mtab-sub').textContent=(pr?'PRJ-'+String(PROJ.indexOf(pr)+1).padStart(3,'0')+' // ':'')+nb;
+  document.getElementById('minfo').innerHTML='<span>Model:</span> '+nm2+'<br/><span>Faces:</span> '+(pr?'~4,200':'—')+'<br/><span>Unit:</span> mm';
+  // Sidebar bodies
+  var sb=document.getElementById('msb'); if(!sb) return;
+  var tags=(pr&&pr.tags)?pr.tags:['Body'];
+  sb.innerHTML='<div class="msbl">BODIES</div>'+tags.map(function(t,i){return '<div class="msbi '+(i===0?'on':'')+'">◆ '+t+'</div>';}).join('')
+    +'<div class="msbl" style="margin-top:10px">PROPERTIES</div>'
+    +'<div class="msbi">⊙ Material</div><div class="msbi">⊙ Mass Props</div><div class="msbi">⊙ Joints</div>';
+  sb.querySelectorAll('.msbi').forEach(function(el){
+    el.addEventListener('click',function(){sb.querySelectorAll('.msbi').forEach(function(e){e.classList.remove('on');});el.classList.add('on');});
+  });
+  if(mCtrl) mCtrl.reset();
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow='hidden';
+  setTimeout(function(){
+    var vp=document.getElementById('modal-canvas').parentElement;
+    mRen.setSize(vp.clientWidth,vp.clientHeight,false);
+    mCam.aspect=vp.clientWidth/vp.clientHeight; mCam.updateProjectionMatrix();
+  },60);
+};
+
+window.closeModal=function(){
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow='';
+};
+
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
+
+window.mTool=function(t){
+  ['orb','zm','pan'].forEach(function(id){var b=document.getElementById('mt-'+id);if(b)b.classList.remove('on');});
+  var b=document.getElementById('mt-'+({orbit:'orb',zoom:'zm',pan:'pan'}[t]||t)); if(b)b.classList.add('on');
+  var el=document.getElementById('mst-tool'); if(el)el.textContent=t.toUpperCase();
+  var cv=document.getElementById('modal-canvas');
+  cv.style.cursor=t==='zoom'?'zoom-in':t==='pan'?'move':'grab';
+};
+window.mReset=function(){if(mCtrl)mCtrl.reset();};
+window.mView=function(v){
+  if(!mCam)return;
+  if(v==='front'){mCam.position.set(0,0,7);mCam.lookAt(0,0,0);}
+  else if(v==='top'){mCam.position.set(0,7,.01);mCam.lookAt(0,0,0);}
+  else if(v==='right'){mCam.position.set(7,0,0);mCam.lookAt(0,0,0);}
+};
+window.mWire=function(){
+  mWireActive=!mWireActive;
+  var btn=document.getElementById('mt-wire'); if(btn)btn.classList.toggle('on',mWireActive);
+  if(!mObj)return;
+  mObj.traverse(function(c){
+    if(c.isMesh){
+      if(mWireActive){c.userData.om=c.material;c.material=new THREE.MeshBasicMaterial({color:0x00a8c0,wireframe:true});}
+      else if(c.userData.om){c.material=c.userData.om;}
+    }
+  });
+};
+
+// ─────────────────────────────────────────────────
+//  SCROLL REVEAL + SKILL BARS
+// ─────────────────────────────────────────────────
+var revObs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting){
+      e.target.classList.add('vis');
+      e.target.querySelectorAll('.bar-fill').forEach(function(b){b.style.width=b.dataset.w+'%';});
+      revObs.unobserve(e.target);
+    }
+  });
+},{threshold:.1});
+document.querySelectorAll('.rev').forEach(function(el){revObs.observe(el);});
+document.querySelectorAll('.bar-fill').forEach(function(b){
+  var o=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)b.style.width=b.dataset.w+'%';});},{threshold:.2});
+  o.observe(b);
+});
+
+// ─────────────────────────────────────────────────
+//  CUSTOM CURSOR
+// ─────────────────────────────────────────────────
+(function(){
+  if(window.matchMedia('(pointer:coarse)').matches)return;
+  var dot=document.querySelector('.cur-d');
+  var ring=document.querySelector('.cur-r');
+  if(!dot||!ring)return;
+  var mx=window.innerWidth/2,my=window.innerHeight/2,rx=mx,ry=my;
+  window.addEventListener('mousemove',function(e){
+    mx=e.clientX;my=e.clientY;
+    document.body.style.setProperty('--mx',mx+'px');
+    document.body.style.setProperty('--my',my+'px');
+    dot.style.transform='translate('+mx+'px,'+my+'px) translate(-50%,-50%)';
+  });
+  window.addEventListener('mousedown',function(){ring.classList.add('prs');});
+  window.addEventListener('mouseup',function(){ring.classList.remove('prs');});
+  document.querySelectorAll('a,button,.pcard,.psel,.vb,.mt').forEach(function(el){
+    el.addEventListener('mouseenter',function(){ring.classList.add('hov');});
+    el.addEventListener('mouseleave',function(){ring.classList.remove('hov');});
+  });
+  (function lc(){rx+=(mx-rx)*.13;ry+=(my-ry)*.13;ring.style.transform='translate('+rx+'px,'+ry+'px) translate(-50%,-50%)';requestAnimationFrame(lc);})();
+})();
+</script>
+</body>
+</html>
